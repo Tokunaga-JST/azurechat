@@ -11,7 +11,7 @@ param location string
 
 // azure open ai -- only regions supporting gpt-35-turbo v1106
 @description('Location for the OpenAI resource group')
-@allowed(['australiaeast', 'canadaeast', 'francecentral', 'southindia', 'uksouth', 'swedencentral', 'westus'])
+@allowed(['australiaeast', 'canadaeast', 'francecentral', 'southindia', 'uksouth', 'swedencentral', 'westus', 'japaneast'])
 @metadata({
   azd: {
     type: 'location'
@@ -23,9 +23,9 @@ param openAISku string = 'S0'
 param openAIApiVersion string = '2023-12-01-preview'
 
 param chatGptDeploymentCapacity int = 120
-param chatGptDeploymentName string = 'chat-gpt-35-turbo'
-param chatGptModelName string = 'gpt-35-turbo'
-param chatGptModelVersion string = '1106'
+param chatGptDeploymentName string = 'gpt-4o'
+param chatGptModelName string = 'gpt-4o'
+param chatGptModelVersion string = '2024-05-13'
 param embeddingDeploymentName string = 'embedding'
 param embeddingDeploymentCapacity int = 120
 param embeddingModelName string = 'text-embedding-ada-002'
