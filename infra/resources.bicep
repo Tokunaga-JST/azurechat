@@ -79,7 +79,7 @@ var llmDeployments = [
       version: chatGptModelVersion
     }
     sku: {
-      name: 'Standard'
+      name: 'S0'
       capacity: chatGptDeploymentCapacity
     }
   }
