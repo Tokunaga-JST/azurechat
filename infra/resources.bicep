@@ -30,7 +30,7 @@ param speechServiceSkuName string = 'S0'
 
 param formRecognizerSkuName string = 'S0'
 
-param searchServiceSkuName string = 'standard'
+param searchServiceSkuName string = 'S0'
 param searchServiceIndexName string = 'azure-chat'
 
 param storageServiceSku object
@@ -79,7 +79,7 @@ var llmDeployments = [
       version: chatGptModelVersion
     }
     sku: {
-      name: 'Standard'
+      name: 'S0'
       capacity: chatGptDeploymentCapacity
     }
   }
@@ -508,7 +508,7 @@ resource azureopenaidalle 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
       }
     }
     sku: {
-      name: 'Standard'
+      name: 'S0'
       capacity: dalleDeploymentCapacity
     }
   }
@@ -539,7 +539,7 @@ resource azureopenaivision 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
       }
     }
     sku: {
-      name: 'Standard'
+      name: 'S0'
       capacity: gptvisionDeploymentCapacity
     }
   }
