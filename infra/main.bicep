@@ -3,11 +3,11 @@ targetScope = 'subscription'
 @minLength(1)
 @maxLength(64)
 @description('Name of the the environment which is used to generate a short unique hash used in all resources.')
-param name string
+param name string = 'azurechat-dev'
 
 @minLength(1)
 @description('Primary location for all resources')
-param location string
+param location string = 'japaneast'
 
 // azure open ai -- only regions supporting gpt-35-turbo v1106
 @description('Location for the OpenAI resource group')
@@ -17,7 +17,7 @@ param location string
     type: 'location'
   }
 })
-param openAILocation string
+param openAILocation string = 'japaneast'
 
 param openAISku string = 'S0'
 param openAIApiVersion string = '2023-12-01-preview'
@@ -33,7 +33,7 @@ param embeddingModelName string = 'text-embedding-ada-002'
 // DALL-E v3 only supported in Sweden Central for now
 @description('Location for the OpenAI DALL-E 3 instance resource group')
 @allowed(['swedencentral'])
-param dalleLocation string
+param dalleLocation string = 'swedencentral'
 
 param dalleDeploymentCapacity int = 1
 param dalleDeploymentName string = 'dall-e-3'
@@ -42,8 +42,8 @@ param dalleApiVersion string = '2023-12-01-preview'
 
 // DALL-E v3 only supported in Sweden Central for now
 @description('Location for the GPT vision instance resource')
-@allowed(['swedencentral','westus',])
-param gptvisionLocation string
+@allowed(['swedencentral','westus','japaneast'])
+param gptvisionLocation string = 'japaneast'
 
 param gptvisionDeploymentCapacity int = 1
 param gptvisionDeploymentName string = 'gpt-4-vision'
