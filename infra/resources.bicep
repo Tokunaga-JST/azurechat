@@ -1,5 +1,3 @@
-provider microsoftGraph
-
 param name string = 'AzureChat4JST'
 @description('Applicaton displayname, default value is same as appName')
 param displayName string = name
@@ -248,7 +246,7 @@ resource webApp 'Microsoft.Web/sites@2020-06-01' = {
         }
         {
           name: 'AZURE_AD_CLIENT_ID'
-          value: webApp.identity.principalId
+          value: app.appId
         }
         {
           name: 'AZURE_AD_CLIENT_SECRET'
@@ -274,7 +272,7 @@ resource app 'Microsoft.Graph/applications@v1.0' = {
   displayName: displayName
   uniqueName: name
   spa: {
-    redirectUris: ["https://${webApp.properties.defaultHostName}/api/auth/callback/azure-ad"]
+    redirectUris: ['https://${webApp.properties.defaultHostName}/api/auth/callback/azure-ad']
   }
 }
 
