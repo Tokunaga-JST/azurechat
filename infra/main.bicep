@@ -1,3 +1,5 @@
+provider microsoftGraph
+
 targetScope = 'subscription'
 
 @minLength(1)
