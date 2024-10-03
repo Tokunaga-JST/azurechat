@@ -1,4 +1,8 @@
-param name string = 'azurechat-demo'
+provider microsoftGraph
+
+param name string = 'AzureChat4JST'
+@description('Applicaton displayname, default value is same as appName')
+param displayName string = name
 param resourceToken string
 
 param openai_api_version string
@@ -63,6 +67,7 @@ var la_workspace_name = toLower('${name}-la-${resourceToken}')
 var diagnostic_setting_name = 'AppServiceConsoleLogs'
 
 var keyVaultSecretsOfficerRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b86a8fe4-44ce-4948-aee5-eccb2c155cd7')
+var contributorRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')
 
 var validStorageServiceImageContainerName = toLower(replace(storageServiceImageContainerName, '-', ''))
 
@@ -237,6 +242,18 @@ resource webApp 'Microsoft.Web/sites@2020-06-01' = {
           name: 'AZURE_STORAGE_ACCOUNT_KEY'
           value: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${kv::AZURE_STORAGE_ACCOUNT_KEY.name})'
         }
+        {
+          name: 'AZURE_AD_TENANT_ID'
+          value: subscription().tenantId
+        }
+        {
+          name: 'AZURE_AD_CLIENT_ID'
+          value: webApp.identity.principalId
+        }
+        {
+          name: 'AZURE_AD_CLIENT_SECRET'
+          value: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${kv::AZURE_AD_CLIENT_SECRET.name})'
+        }
       ]
     }
   }
@@ -251,6 +268,18 @@ resource webApp 'Microsoft.Web/sites@2020-06-01' = {
       httpLogs: { fileSystem: { enabled: true, retentionInDays: 1, retentionInMb: 35 } }
     }
   }
+}
+
+resource app 'Microsoft.Graph/applications@v1.0' = {
+  displayName: displayName
+  uniqueName: name
+  spa: {
+    redirectUris: ["https://${webApp.properties.defaultHostName}/api/auth/callback/azure-ad"]
+  }
+}
+
+resource sp 'Microsoft.Graph/servicePrincipals@v1.0' = {
+  appId: app.appId
 }
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
@@ -280,6 +309,16 @@ resource kvFunctionAppPermissions 'Microsoft.Authorization/roleAssignments@2020-
     principalId: webApp.identity.principalId
     principalType: 'ServicePrincipal'
     roleDefinitionId: keyVaultSecretsOfficerRole
+  }
+}
+
+resource contributorAppPermissions 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(kv.id, webApp.name, contributorRole)
+  scope: rg
+  properties: {
+    principalId: webApp.identity.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: contributorRole
   }
 }
 
@@ -367,6 +406,14 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
     properties: {
       contentType: 'text/plain'
       value: storage.listKeys().keys[0].value
+    }
+  }
+
+  resource AZURE_AD_CLIENT_SECRET 'secrets' = {
+    name: 'AZURE_AD_CLIENT_SECRET'
+    properties: {
+      contentType: 'text/plain'
+      value: app.secretText
     }
   }
 }
