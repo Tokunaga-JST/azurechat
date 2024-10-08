@@ -240,18 +240,6 @@ resource webApp 'Microsoft.Web/sites@2020-06-01' = {
           name: 'AZURE_STORAGE_ACCOUNT_KEY'
           value: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${kv::AZURE_STORAGE_ACCOUNT_KEY.name})'
         }
-        {
-          name: 'AZURE_AD_TENANT_ID'
-          value: subscription().tenantId
-        }
-        {
-          name: 'AZURE_AD_CLIENT_ID'
-          value: app.appId
-        }
-        {
-          name: 'AZURE_AD_CLIENT_SECRET'
-          value: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${kv::AZURE_AD_CLIENT_SECRET.name})'
-        }
       ]
     }
   }
@@ -273,6 +261,30 @@ resource app 'Microsoft.Graph/applications@v1.0' = {
   uniqueName: name
   spa: {
     redirectUris: ['https://${webApp.properties.defaultHostName}/api/auth/callback/azure-ad']
+  }
+}
+
+resource webAppSiteConfig 'Microsoft.Web/sites/config@2022-09-01' = {
+  name: 'appsettings'
+  kind: 'string'
+  parent: webApp
+  properties: {
+    siteConfig: {
+      appSettings: [
+        {
+          name: 'AZURE_AD_TENANT_ID'
+          value: subscription().tenantId
+        }
+        {
+          name: 'AZURE_AD_CLIENT_ID'
+          value: app.appId
+        }
+        {
+          name: 'AZURE_AD_CLIENT_SECRET'
+          value: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${kv::AZURE_AD_CLIENT_SECRET.name})'
+        }
+      ]
+    }
   }
 }
 
