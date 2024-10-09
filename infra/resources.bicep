@@ -1,4 +1,4 @@
-param name string = 'AzureChat4JST'
+param name string = 'AzureChat4JST(dev3)'
 @description('Applicaton displayname, default value is same as appName')
 param displayName string = name
 param resourceToken string
@@ -256,6 +256,7 @@ resource webApp 'Microsoft.Web/sites@2020-06-01' = {
   }
 }
 
+extension microsoftGraphV1_0
 resource app 'Microsoft.Graph/applications@v1.0' = {
   displayName: displayName
   uniqueName: name
@@ -264,27 +265,20 @@ resource app 'Microsoft.Graph/applications@v1.0' = {
   }
 }
 
-resource webAppSiteConfig 'Microsoft.Web/sites/config@2022-09-01' = {
+// 現在 settings に設定されている値を取得する
+var currentSettings = list('${webApp.id}/config/appsettings', '2021-03-01').properties
+var newSettings = {
+  AZURE_AD_TENANT_ID: subscription().tenantId
+  AZURE_AD_CLIENT_ID: app.appId
+  AZURE_AD_CLIENT_SECRET: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${kv::AZURE_AD_CLIENT_SECRET.name})'
+}
+
+module settings 'app_settings.bicep' = {
   name: 'appsettings'
-  kind: 'string'
-  parent: webApp
-  properties: {
-    siteConfig: {
-      appSettings: [
-        {
-          name: 'AZURE_AD_TENANT_ID'
-          value: subscription().tenantId
-        }
-        {
-          name: 'AZURE_AD_CLIENT_ID'
-          value: app.appId
-        }
-        {
-          name: 'AZURE_AD_CLIENT_SECRET'
-          value: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${kv::AZURE_AD_CLIENT_SECRET.name})'
-        }
-      ]
-    }
+  params: {
+    appName: webApp.name
+    setting: newSettings
+    currentSettings: currentSettings
   }
 }
 
