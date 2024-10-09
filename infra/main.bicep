@@ -1,5 +1,3 @@
-provider microsoftGraph
-
 targetScope = 'subscription'
 
 @minLength(1)
@@ -29,7 +27,7 @@ param chatGptDeploymentName string = 'gpt-4o'
 param chatGptModelName string = 'gpt-4o'
 param chatGptModelVersion string = '2024-05-13'
 param embeddingDeploymentName string = 'embedding'
-param embeddingDeploymentCapacity int = 120
+param embeddingDeploymentCapacity int = 10
 param embeddingModelName string = 'text-embedding-ada-002'
 
 // DALL-E v3 only supported in Sweden Central for now

@@ -1,6 +1,4 @@
-param name string = 'AzureChat4JST(dev3)'
-@description('Applicaton displayname, default value is same as appName')
-param displayName string = name
+param name string = 'AzureChat4JST'
 param resourceToken string
 
 param openai_api_version string
