@@ -240,6 +240,10 @@ resource webApp 'Microsoft.Web/sites@2020-06-01' = {
           name: 'AZURE_STORAGE_ACCOUNT_KEY'
           value: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${kv::AZURE_STORAGE_ACCOUNT_KEY.name})'
         }
+        {
+          name: 'AZURE_AD_TENANT_ID'
+          value: subscription().tenantId
+        }
       ]
     }
   }
@@ -254,36 +258,6 @@ resource webApp 'Microsoft.Web/sites@2020-06-01' = {
       httpLogs: { fileSystem: { enabled: true, retentionInDays: 1, retentionInMb: 35 } }
     }
   }
-}
-
-extension microsoftGraphV1_0
-resource app 'Microsoft.Graph/applications@v1.0' = {
-  displayName: displayName
-  uniqueName: name
-  spa: {
-    redirectUris: ['https://${webApp.properties.defaultHostName}/api/auth/callback/azure-ad']
-  }
-}
-
-// 現在 settings に設定されている値を取得する
-var currentSettings = list('${webApp.id}/config/appsettings', '2021-03-01').properties
-var newSettings = {
-  AZURE_AD_TENANT_ID: subscription().tenantId
-  AZURE_AD_CLIENT_ID: app.appId
-  AZURE_AD_CLIENT_SECRET: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${kv::AZURE_AD_CLIENT_SECRET.name})'
-}
-
-module settings 'app_settings.bicep' = {
-  name: 'appsettings'
-  params: {
-    appName: webApp.name
-    setting: newSettings
-    currentSettings: currentSettings
-  }
-}
-
-resource sp 'Microsoft.Graph/servicePrincipals@v1.0' = {
-  appId: app.appId
 }
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
@@ -318,7 +292,7 @@ resource kvFunctionAppPermissions 'Microsoft.Authorization/roleAssignments@2020-
 
 resource contributorAppPermissions 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
   name: guid(kv.id, webApp.name, contributorRole)
-  scope: rg
+  scope: resourceGroup()
   properties: {
     principalId: webApp.identity.principalId
     principalType: 'ServicePrincipal'
@@ -410,14 +384,6 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
     properties: {
       contentType: 'text/plain'
       value: storage.listKeys().keys[0].value
-    }
-  }
-
-  resource AZURE_AD_CLIENT_SECRET 'secrets' = {
-    name: 'AZURE_AD_CLIENT_SECRET'
-    properties: {
-      contentType: 'text/plain'
-      value: app.secretText
     }
   }
 }
